@@ -3,13 +3,21 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Markerless AR 3D Object Placement</title>
   <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
   <script src="https://cdn.rawgit.com/jeromeetienne/ar.js/1.7.2/aframe/build/aframe-ar.min.js"></script>
   <script src="https://cdn.jsdelivr.net/gh/c-frame/aframe-gesture-detector@1.1.3/aframe-gesture-detector.min.js"></script>
   <style>
-    body { margin: 0; overflow: hidden; }
+    body { 
+      margin: 0; 
+      overflow: hidden; 
+      touch-action: manipulation; /* Mejora la respuesta táctil en móviles */
+    }
+    a-scene {
+      width: 100vw; 
+      height: 100vh; 
+    }
   </style>
 </head>
 <body>
