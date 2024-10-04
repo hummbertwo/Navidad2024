@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Simple AR Hit Test</title>
+    <title>AR Hit Test Example</title>
     <link rel="stylesheet" href="main.css">
 </head>
 <body>
@@ -23,30 +23,23 @@
         animate();
 
         function init() {
-            // Crear la escena
             scene = new THREE.Scene();
 
-            // Crear la cámara
             camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.01, 20);
 
-            // Configurar el renderizador
             renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
             document.body.appendChild(renderer.domElement);
             renderer.xr.enabled = true;
 
-            // Agregar el botón AR
             document.body.appendChild(ARButton.createButton(renderer));
 
-            // Agregar una luz a la escena
             const light = new THREE.HemisphereLight(0xffffff, 0x444444);
             scene.add(light);
 
-            // Crear un cubo para colocar
             const geometry = new THREE.BoxGeometry(0.1, 0.1, 0.1);
             const material = new THREE.MeshNormalMaterial();
 
-            // Configurar el controlador
             controller = renderer.xr.getController(0);
             controller.addEventListener('select', () => {
                 if (reticle.visible) {
@@ -57,7 +50,6 @@
             });
             scene.add(controller);
 
-            // Crear el retículo para indicar donde se colocará el objeto
             reticle = new THREE.Mesh(
                 new THREE.RingGeometry(0.1, 0.15, 32).rotateX(-Math.PI / 2),
                 new THREE.MeshBasicMaterial({ color: 0xFFFFFF, transparent: true, opacity: 0.5 })
@@ -66,7 +58,6 @@
             reticle.visible = false;
             scene.add(reticle);
 
-            // Manejar el cambio de tamaño de la ventana
             window.addEventListener('resize', onWindowResize);
         }
 
@@ -94,6 +85,8 @@
                     } else {
                         reticle.visible = false;
                     }
+                }).catch((err) => {
+                    console.error("Error requesting hit test source: ", err);
                 });
             }
             renderer.render(scene, camera);
@@ -101,4 +94,3 @@
     </script>
 </body>
 </html>
-
