@@ -6,7 +6,7 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0"
     />
-    <title>AR.js with Cube Placement</title>
+    <title>AR.js with Adjusted Cube Placement</title>
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
     <script src="https://jeromeetienne.github.io/AR.js/aframe/build/aframe-ar.js"></script>
   </head>
@@ -20,30 +20,30 @@
       <!-- Círculo indicador para la posición del cubo -->
       <a-circle
         id="indicator"
-        position="0 0 -2"
-        radius="0.5"
+        position="0 0 -3"  <!-- Alejado más de la cámara -->
+        radius="0.3"      <!-- Reducido el tamaño del círculo -->
         color="blue"
         material="opacity: 0.5;"
         cursor="rayOrigin: mouse"
-        event-set__click="scale: 0 0 0;"
         class="clickable"
       ></a-circle>
 
       <!-- Entidad del cubo, inicialmente invisible -->
       <a-box
         id="cube"
-        position="0 0 -2"
+        position="0 0 -3"  <!-- Alejado más de la cámara -->
         rotation="0 45 45"
-        scale="0 0 0"
+        scale="0 0 0"       <!-- Inicia oculto -->
         color="red"
       ></a-box>
 
-      <!-- Cámara AR -->
+      <!-- Cámara AR con ajuste de FOV -->
       <a-entity
         camera
-        position="0 0 0"
+        position="0 1.6 0"         <!-- Cámara ligeramente más alta -->
         look-controls
         wasd-controls
+        fov="70"                   <!-- Ajuste del campo de visión para alejar un poco -->
         arjs
       ></a-entity>
 
@@ -54,7 +54,7 @@
           const indicator = document.querySelector('#indicator');
           
           // Reemplaza el círculo con el cubo
-          cube.setAttribute('scale', '1 1 1');
+          cube.setAttribute('scale', '0.5 0.5 0.5');  <!-- Cubo más pequeño -->
           indicator.setAttribute('visible', 'false');
         });
       </script>
