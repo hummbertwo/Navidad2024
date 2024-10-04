@@ -15,25 +15,29 @@
   <!-- Escena de A-Frame con AR.js sin marcador -->
   <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;">
     
+    <!-- Luz para iluminar el objeto 3D -->
+    <a-light type="ambient" color="#ffffff"></a-light>
+    <a-light type="directional" position="0 1 0" intensity="1"></a-light>
+
     <!-- Objeto 3D interactivo sin marcador -->
     <a-entity
       id="movable-object"
-      gltf-model="#chair"
-      position="0 0 0"
-      scale="0.3 0.3 0.3"
+      gltf-model="#example-model"
+      position="0 1 -5"
+      scale="1 1 1"
       gesture-detector
       rotation="0 0 0"
-      visible="false"> <!-- inicialmente no visible -->
+      visible="true"> <!-- ahora visible para que se muestre de inmediato -->
     </a-entity>
 
     <!-- Cámara AR.js sin marcador -->
-    <a-entity camera look-controls="zoom: false"></a-entity>
+    <a-entity camera look-controls position="0 1.6 5"></a-entity>
   </a-scene>
 
   <!-- Modelo 3D en formato GLTF -->
   <a-assets>
-    <!-- Aquí debes colocar la ruta de tu modelo GLTF -->
-    <a-asset-item id="chair" src="./models/chair.gltf"></a-asset-item>
+    <!-- Modelo 3D de ejemplo en formato GLTF (un pato) -->
+    <a-asset-item id="example-model" src="https://cdn.glitch.global/d69e9c50-5029-4740-a86f-0b48b979d8b1/Duck.glb"></a-asset-item>
   </a-assets>
 
   <script>
