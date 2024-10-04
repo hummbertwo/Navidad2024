@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>AR.js - Place Object on Click</title>
+    <title>AR.js - Place Object with Zoom</title>
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
     <script src="https://cdn.rawgit.com/jeromeetienne/AR.js/2.0.1/aframe/build/aframe-ar.js"></script>
     <style>
@@ -15,11 +15,18 @@
 
       #instruction {
         position: absolute;
-        bottom: 20px;
+        bottom: 50px;
         width: 100%;
         text-align: center;
         color: white;
         font-size: 18px;
+      }
+
+      #zoom-slider {
+        position: absolute;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
       }
     </style>
   </head>
@@ -42,14 +49,15 @@
         ></a-box>
       </a-entity>
 
-      <!-- Cámara para el entorno AR -->
-      <a-entity camera></a-entity>
+      <!-- Cámara con zoom ajustable -->
+      <a-entity id="camera" camera="zoom: 1" look-controls></a-entity>
 
       <!-- Script para manejar el click y la colocación del objeto -->
       <script>
-        // Obtener el indicador de colocación
+        // Obtener el indicador de colocación y la cámara
         var placementIndicator = document.querySelector("#placement-indicator");
         var instructionText = document.getElementById("instruction");
+        var cameraEl = document.querySelector("#camera");
 
         // Evento click para colocar el objeto en la posición que el usuario toque
         document.querySelector("a-scene").addEventListener("click", function (event) {
@@ -62,7 +70,23 @@
           // Ocultar el mensaje de instrucción después de colocar el objeto
           instructionText.style.display = "none";
         });
+
+        // Función para cambiar el zoom de la cámara
+        function adjustZoom(value) {
+          cameraEl.setAttribute("camera", "zoom", value);
+        }
       </script>
     </a-scene>
+
+    <!-- Deslizador de zoom -->
+    <input
+      id="zoom-slider"
+      type="range"
+      min="1"
+      max="3"
+      step="0.1"
+      value="1"
+      oninput="adjustZoom(this.value)"
+    />
   </body>
 </html>
