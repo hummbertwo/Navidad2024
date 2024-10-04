@@ -1,62 +1,43 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0"
-    />
-    <title>AR.js with Cube Placement</title>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Three.js AR Cube on Mobile</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/aframe/build/aframe-ar-nft.min.js"></script>
-  </head>
-  <body style="margin: 0; overflow: hidden">
-    <a-scene
-      embedded
-      vr-mode-ui="enabled: false"
-      renderer="logarithmicDepthBuffer: true;"
-      arjs="sourceType: webcam; detectionMode: mono_and_matrix; matrixCodeType: 3x3; debugUIEnabled: false;"
-    >
-      <!-- Círculo indicador para la posición del cubo -->
-      <a-circle
-        id="indicator"
-        position="0 0 -5"  <!-- Alejado más de la cámara -->
-        radius="0.2"      <!-- Círculo más pequeño -->
-        color="blue"
-        material="opacity: 0.5;"
-        cursor="rayOrigin: mouse"
-        class="clickable"
-      ></a-circle>
+    <script src="https://cdn.rawgit.com/jeromeetienne/ar.js/1.7.2/aframe/build/aframe-ar.min.js"></script>
+</head>
+<body style="margin: 0; overflow: hidden;">
 
-      <!-- Entidad del cubo, inicialmente invisible -->
-      <a-box
-        id="cube"
-        position="0 0 -5"  <!-- Alejado más de la cámara -->
-        rotation="0 45 45"
-        scale="0 0 0"       <!-- Inicia oculto -->
-        color="red"
-      ></a-box>
+<a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;">
+    <!-- Cámara con AR.js -->
+    <a-entity camera></a-entity>
 
-      <!-- Cámara AR con ajuste de FOV -->
-      <a-entity
-        camera
-        look-controls
-        wasd-controls
-        fov="75"                   <!-- Ajuste del campo de visión -->
-        arjs
-      ></a-entity>
+    <!-- Indicador de base -->
+    <a-cylinder id="baseIndicator" position="0 0 0" rotation="-90 0 0" radius="0.1" height="0.01" color="red" material="opacity: 0.5;"></a-cylinder>
 
-      <!-- Manejo de eventos para colocar el cubo -->
-      <script>
-        document.querySelector('#indicator').addEventListener('click', function () {
-          const cube = document.querySelector('#cube');
-          const indicator = document.querySelector('#indicator');
-          
-          // Reemplaza el círculo con el cubo
-          cube.setAttribute('scale', '0.3 0.3 0.3');  <!-- Cubo más pequeño -->
-          indicator.setAttribute('visible', 'false');
+    <!-- Cubo que aparecerá cuando se toque la pantalla -->
+    <a-box id="cube" position="0 0.05 0" rotation="0 45 0" color="#4CC3D9" scale="0.1 0.1 0.1" visible="false"></a-box>
+
+    <!-- Suelo invisible para detectar el toque -->
+    <a-plane position="0 0 0" rotation="-90 0 0" width="10" height="10" material="opacity: 0; transparent: true;" id="floor"></a-plane>
+
+    <script>
+        // Obtener elementos
+        const cube = document.getElementById('cube');
+        const baseIndicator = document.getElementById('baseIndicator');
+        const floor = document.getElementById('floor');
+
+        // Escuchar el toque en el suelo
+        floor.addEventListener('click', function (event) {
+            const intersection = event.detail.intersection.point; // Punto donde se toca
+            baseIndicator.setAttribute('position', intersection); // Mover el indicador de base
+            cube.setAttribute('position', {x: intersection.x, y: 0.05, z: intersection.z}); // Colocar el cubo
+            cube.setAttribute('visible', 'true'); // Hacer visible el cubo
         });
-      </script>
-    </a-scene>
-  </body>
+    </script>
+</a-scene>
+
+</body>
 </html>
