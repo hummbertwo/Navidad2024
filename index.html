@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -19,53 +20,15 @@
     <a-light type="ambient" color="#ffffff"></a-light>
     <a-light type="directional" position="0 1 0" intensity="1"></a-light>
 
-    <!-- Objeto 3D interactivo sin marcador -->
-    <a-entity
-      id="movable-object"
-      gltf-model="#example-model"
-      position="0 1 -5"
-      scale="1 1 1"
-      gesture-detector
-      rotation="0 0 0"
-      visible="true"> <!-- ahora visible para que se muestre de inmediato -->
-    </a-entity>
+    <!-- Objeto 3D (cubo) -->
+    <a-box position="0 1 -5" rotation="0 45 0" color="#4CC3D0" scale="1 1 1" gesture-detector></a-box>
 
     <!-- Cámara AR.js sin marcador -->
-    <a-entity camera look-controls position="0 1.6 5"></a-entity>
+    <a-entity camera look-controls position="0 1.6 0"></a-entity>
   </a-scene>
 
-  <!-- Modelo 3D en formato GLTF -->
-  <a-assets>
-    <!-- Modelo 3D de ejemplo en formato GLTF (un pato) -->
-    <a-asset-item id="example-model" src="https://cdn.glitch.global/d69e9c50-5029-4740-a86f-0b48b979d8b1/Duck.glb"></a-asset-item>
-  </a-assets>
-
   <script>
-    const object = document.getElementById('movable-object');
-
-    // Mostrar el objeto cuando se toque la pantalla
-    window.addEventListener('click', (event) => {
-      if (!object.getAttribute('visible')) {
-        object.setAttribute('visible', 'true');
-        object.setAttribute('position', '0 0 -2'); // Aparecerá enfrente del usuario
-      }
-    });
-
-    // Detectar gestos y mover el objeto
-    object.addEventListener('dragstart', (event) => {
-      console.log('Object drag started:', event.detail.position);
-    });
-
-    object.addEventListener('dragmove', (event) => {
-      // Mover el objeto con el dedo (actualizar su posición)
-      const newPosition = event.detail.position;
-      object.setAttribute('position', newPosition);
-      console.log('Object moved to:', newPosition);
-    });
-
-    object.addEventListener('dragend', (event) => {
-      console.log('Object drag ended:', event.detail.position);
-    });
+    // La lógica de interacción se puede agregar aquí si es necesario
   </script>
 </body>
 </html>
