@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Three.js AR Cylinder on Mobile</title>
+    <title>AR Object Placement</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
     <script src="https://cdn.rawgit.com/jeromeetienne/ar.js/1.7.2/aframe/build/aframe-ar.min.js"></script>
@@ -14,27 +14,46 @@
     <!-- Cámara con AR.js -->
     <a-entity camera></a-entity>
 
-    <!-- Indicador de base (círculo blanco) -->
-    <a-ring id="baseIndicator" position="0 0 0" rotation="-90 0 0" radius-inner="0.1" radius-outer="0.15" color="white" material="opacity: 0.8;"></a-ring>
+    <!-- Indicador de área con líneas -->
+    <a-entity id="grid" geometry="primitive: ring; radiusOuter: 1.5; radiusInner: 1.3" position="0 0 0" rotation="-90 0 0" material="color: white; wireframe: true;"></a-entity>
 
-    <!-- Cilindro amarillo que aparecerá cuando se toque la pantalla -->
-    <a-cylinder id="cylinder" position="0 0.15 0" radius="0.1" height="0.3" color="yellow" visible="false"></a-cylinder>
+    <!-- Botón para añadir objetos -->
+    <a-plane position="1 1.5 -3" width="0.5" height="0.2" color="green" id="addButton" text="value: Add; color: white;"></a-plane>
 
-    <!-- Suelo invisible para detectar el toque -->
+    <!-- Botón para resetear escena -->
+    <a-plane position="-1 1.5 -3" width="0.5" height="0.2" color="red" id="resetButton" text="value: Reset; color: white;"></a-plane>
+
+    <!-- Suelo invisible para detectar toques -->
     <a-plane position="0 0 0" rotation="-90 0 0" width="10" height="10" material="opacity: 0; transparent: true;" id="floor"></a-plane>
 
+    <!-- Script para manejo de interacción -->
     <script>
-        // Obtener elementos
-        const cylinder = document.getElementById('cylinder');
-        const baseIndicator = document.getElementById('baseIndicator');
+        const addButton = document.getElementById('addButton');
+        const resetButton = document.getElementById('resetButton');
         const floor = document.getElementById('floor');
+        const scene = document.querySelector('a-scene');
+        
+        let objects = [];
 
-        // Escuchar el toque en el suelo
-        floor.addEventListener('click', function (event) {
-            const intersection = event.detail.intersection.point; // Punto donde se toca
-            baseIndicator.setAttribute('position', intersection); // Mover el indicador de base
-            cylinder.setAttribute('position', {x: intersection.x, y: 0.15, z: intersection.z}); // Colocar el cilindro
-            cylinder.setAttribute('visible', 'true'); // Hacer visible el cilindro
+        // Evento para añadir objetos
+        addButton.addEventListener('click', () => {
+            floor.addEventListener('click', function (event) {
+                const intersection = event.detail.intersection.point; // Punto donde se toca
+                const newBox = document.createElement('a-box');
+                newBox.setAttribute('position', {x: intersection.x, y: 0.1, z: intersection.z});
+                newBox.setAttribute('width', '0.2');
+                newBox.setAttribute('height', '0.2');
+                newBox.setAttribute('depth', '0.2');
+                newBox.setAttribute('color', '#4CC3D9');
+                scene.appendChild(newBox);
+                objects.push(newBox); // Guardar objeto
+            });
+        });
+
+        // Evento para resetear la escena
+        resetButton.addEventListener('click', () => {
+            objects.forEach(obj => scene.removeChild(obj)); // Eliminar todos los objetos
+            objects = []; // Resetear lista de objetos
         });
     </script>
 </a-scene>
