@@ -3,124 +3,143 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AR Model Placement</title>
-    <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+    <title>AR.js & Three.js Example</title>
+
+    <!-- Importar Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/110/three.min.js"></script>
+
+    <!-- Importar AR.js -->
+    <script src="https://aframe.io/releases/1.0.4/aframe.min.js"></script>
+    <script src="https://cdn.rawgit.com/jeromeetienne/ar.js/1.7.7/aframe/build/aframe-ar.min.js"></script>
+
     <style>
         body {
             margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background-color: #f0f0f0;
+            overflow: hidden;
         }
-
-        model-viewer {
-            width: 100%;
-            height: 80vh;
-        }
-
-        #controls {
-            display: flex;
-            justify-content: center;
-            width: 100%;
-            padding: 10px;
-        }
-
-        button {
-            padding: 10px 20px;
-            margin: 5px;
-            font-size: 16px;
-            background-color: #6200ea;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        button:hover {
-            background-color: #3700b3;
-        }
-
-        #marker {
+        #canvas-container {
             position: absolute;
-            width: 50px;
-            height: 50px;
-            background-color: rgba(255, 255, 255, 0.7);
-            border-radius: 50%;
-            border: 2px solid #6200ea;
-            display: none; /* Inicialmente oculto */
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+        #info {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            color: white;
+            font-size: 18px;
+            z-index: 10;
         }
     </style>
 </head>
 <body>
 
-<!-- Modelo 3D y marcador -->
-<model-viewer 
-    id="ar-viewer"
-    src="https://modelviewer.dev/shared-assets/models/Astronaut.glb"
-    ar
-    ar-modes="scene-viewer quick-look webxr" <!-- Modo de AR nativo -->
-    camera-controls
-    auto-rotate
-    alt="A 3D model of an astronaut"
-    shadow-intensity="1"
-    ar-scale="auto"
-    ar-placement="floor"> <!-- Configuración de AR en el suelo -->
-    <button slot="ar-button" id="ar-button">View in your space</button> <!-- Botón para entrar en AR -->
-</model-viewer>
+<!-- Contenedor de la escena AR -->
+<div id="canvas-container"></div>
+<div id="info">Mueve la cámara para detectar la superficie</div>
 
-<!-- Marcador de suelo -->
-<div id="marker"></div>
-
-<!-- Controles -->
-<div id="controls">
-    <button id="placeButton">Place Model</button>
-    <button id="resetButton">Reset</button>
-</div>
-
-<!-- Script para interacciones -->
+<!-- Script para la escena -->
 <script>
-    const viewer = document.getElementById('ar-viewer');
-    const marker = document.getElementById('marker');
-    const placeButton = document.getElementById('placeButton');
-    const resetButton = document.getElementById('resetButton');
-    let modelPlaced = false;
+    // Configuración básica
+    let scene, camera, renderer;
+    let model;
 
-    // Mostrar marcador cuando se toca la pantalla
-    document.addEventListener('click', (event) => {
-        if (!modelPlaced) {
-            marker.style.display = 'block';
-            marker.style.left = `${event.clientX - marker.offsetWidth / 2}px`;
-            marker.style.top = `${event.clientY - marker.offsetHeight / 2}px`;
+    // Crear la escena
+    scene = new THREE.Scene();
+
+    // Crear la cámara
+    camera = new THREE.Camera();
+    scene.add(camera);
+
+    // Configuración del renderizador
+    renderer = new THREE.WebGLRenderer({
+        antialias: true,
+        alpha: true // Fondo transparente
+    });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.domElement.style.position = 'absolute';
+    document.getElementById('canvas-container').appendChild(renderer.domElement);
+
+    // Luz ambiental para iluminar el modelo
+    let light = new THREE.AmbientLight(0xffffff, 1);
+    scene.add(light);
+
+    // Agregar AR.js a la escena (detectar superficie)
+    let arToolkitSource = new THREEx.ArToolkitSource({
+        sourceType: 'webcam', // Usar la cámara del dispositivo
+    });
+
+    arToolkitSource.init(() => {
+        setTimeout(() => {
+            onResize();
+        }, 2000);
+    });
+
+    // Configurar AR Toolkit Context
+    let arToolkitContext = new THREEx.ArToolkitContext({
+        cameraParametersUrl: 'https://cdn.rawgit.com/jeromeetienne/ar.js/master/aframe/examples/marker-training/examples/camera_para.dat',
+        detectionMode: 'mono'
+    });
+
+    arToolkitContext.init(() => {
+        camera.projectionMatrix.copy(arToolkitContext.getProjectionMatrix());
+    });
+
+    // Detectar redimensionamiento de pantalla
+    window.addEventListener('resize', () => {
+        onResize();
+    });
+
+    function onResize() {
+        arToolkitSource.onResizeElement();
+        arToolkitSource.copyElementSizeTo(renderer.domElement);
+        if (arToolkitContext.arController !== null) {
+            arToolkitSource.copyElementSizeTo(arToolkitContext.arController.canvas);
         }
+    }
+
+    // Marcador AR para posicionar el modelo en el suelo
+    let markerRoot = new THREE.Group();
+    scene.add(markerRoot);
+
+    let arMarkerControls = new THREEx.ArMarkerControls(arToolkitContext, markerRoot, {
+        type: 'pattern',
+        patternUrl: 'https://cdn.rawgit.com/jeromeetienne/ar.js/master/aframe/examples/marker-training/examples/pattern-marker.patt',
     });
 
-    // Colocar el modelo en la posición del marcador
-    placeButton.addEventListener('click', () => {
-        if (!modelPlaced) {
-            const rect = marker.getBoundingClientRect();
-            const x = rect.left + rect.width / 2;
-            const y = rect.top + rect.height / 2;
+    // Cargar modelo 3D
+    let loader = new THREE.GLTFLoader();
+    loader.load('https://modelviewer.dev/shared-assets/models/Astronaut.glb', (gltf) => {
+        model = gltf.scene;
+        model.scale.set(0.5, 0.5, 0.5); // Ajustar tamaño del modelo
+        model.position.y = 0.5; // Elevarlo para que esté sobre la superficie
+        markerRoot.add(model); // Añadir el modelo al marcador
+    });
 
-            // Coloca el modelo en la posición del marcador
-            viewer.setAttribute('style', `position: absolute; left: ${x}px; top: ${y}px; transform: translate(-50%, -50%);`);
+    // Función de animación
+    function animate() {
+        requestAnimationFrame(animate);
 
-            modelPlaced = true;
-            marker.style.display = 'none'; // Ocultar el marcador una vez que se coloca el modelo
+        // Actualizar el contexto de AR.js
+        if (arToolkitSource.ready !== false) {
+            arToolkitContext.update(arToolkitSource.domElement);
         }
-    });
 
-    // Resetear la escena
-    resetButton.addEventListener('click', () => {
-        modelPlaced = false;
-        viewer.setAttribute('style', '');
-        marker.style.display = 'none';
-    });
+        // Rotación del modelo para dar interacción
+        if (model) {
+            model.rotation.y += 0.01; // Girar el modelo
+        }
+
+        renderer.render(scene, camera);
+    }
+
+    // Iniciar animación
+    animate();
 </script>
 
 </body>
 </html>
-
