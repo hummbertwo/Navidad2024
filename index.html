@@ -48,7 +48,7 @@
             // Retículo que indica la superficie
             reticle = new THREE.Mesh(
                 new THREE.RingGeometry(0.15, 0.2, 32).rotateX(-Math.PI / 2),
-                new THREE.MeshBasicMaterial({ color: 0x00FF00, transparent: true, opacity: 0.8 })
+                new THREE.MeshBasicMaterial({ color: #a3a3a3, transparent: true, opacity: 0.8 })
             );
             reticle.matrixAutoUpdate = false;
             reticle.visible = false;
@@ -65,8 +65,8 @@
 
         function onSelect() {
             if (reticle.visible) {
-                const geometry = new THREE.BoxGeometry(0.1, 0.1, 0.1);
-                const material = new THREE.MeshPhongMaterial({ color: 0x00FF00 });
+                const geometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
+                const material = new THREE.MeshPhongMaterial({ color: #ec33ff });
                 const mesh = new THREE.Mesh(geometry, material);
                 reticle.matrix.decompose(mesh.position, mesh.quaternion, mesh.scale);
                 scene.add(mesh);
