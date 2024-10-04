@@ -62,11 +62,14 @@
     id="ar-viewer"
     src="https://modelviewer.dev/shared-assets/models/Astronaut.glb"
     ar
-    ar-modes="scene-viewer quick-look webxr"
+    ar-modes="scene-viewer quick-look webxr" <!-- Modo de AR nativo -->
     camera-controls
     auto-rotate
     alt="A 3D model of an astronaut"
-    shadow-intensity="1">
+    shadow-intensity="1"
+    ar-scale="auto"
+    ar-placement="floor"> <!-- Configuración de AR en el suelo -->
+    <button slot="ar-button" id="ar-button">View in your space</button> <!-- Botón para entrar en AR -->
 </model-viewer>
 
 <!-- Marcador de suelo -->
@@ -120,3 +123,4 @@
 
 </body>
 </html>
+
