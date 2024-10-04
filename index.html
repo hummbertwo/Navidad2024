@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AR.js & Three.js with Surface Detection</title>
+    <title>AR.js & Three.js con Escalado</title>
 
     <!-- Importar Three.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/110/three.min.js"></script>
@@ -30,12 +30,41 @@
             height: 100%;
             overflow: hidden;
         }
+        #controls {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 10px;
+            border-radius: 8px;
+        }
+        button {
+            padding: 10px;
+            font-size: 16px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:disabled {
+            background-color: #ccc;
+        }
     </style>
 </head>
 <body>
 
 <!-- Contenedor de la escena AR -->
 <div id="canvas-container"></div>
+
+<!-- Controles para ajustar el tamaño del modelo -->
+<div id="controls">
+    <button id="scale-up" disabled>Aumentar</button>
+    <button id="scale-down" disabled>Disminuir</button>
+</div>
 
 <!-- Script para la escena -->
 <script>
@@ -116,7 +145,7 @@
     let loader = new THREE.GLTFLoader();
     loader.load('https://modelviewer.dev/shared-assets/models/Astronaut.glb', (gltf) => {
         model = gltf.scene;
-        model.scale.set(0.3, 0.3, 0.3); // Ajustar tamaño del modelo
+        model.scale.set(0.3, 0.3, 0.3); // Ajustar tamaño inicial del modelo
         model.visible = false; // Ocultar hasta que sea colocado
         scene.add(model); // Añadir el modelo a la escena
     });
@@ -143,6 +172,8 @@
         model.visible = true;
         modelPlaced = true;
         indicator.visible = false;
+        document.getElementById('scale-up').disabled = false;
+        document.getElementById('scale-down').disabled = false;
     }
 
     // Función de animación
@@ -170,11 +201,24 @@
     // Iniciar animación
     animate();
 
-    // Colocar el modelo en la superficie apenas se abra la cámara
-    window.addEventListener('load', () => {
-        setTimeout(() => {
+    // Colocar el modelo al hacer clic
+    window.addEventListener('click', () => {
+        if (!modelPlaced) {
             placeModelOnSurface();
-        }, 2000); // Espera unos segundos para cargar la cámara
+        }
+    });
+
+    // Funcionalidad para escalar el modelo
+    document.getElementById('scale-up').addEventListener('click', () => {
+        if (model) {
+            model.scale.multiplyScalar(1.1); // Aumentar el tamaño
+        }
+    });
+
+    document.getElementById('scale-down').addEventListener('click', () => {
+        if (model) {
+            model.scale.multiplyScalar(0.9); // Disminuir el tamaño
+        }
     });
 </script>
 
