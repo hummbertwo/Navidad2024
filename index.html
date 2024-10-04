@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Markerless AR 3D Object Placement</title>
+  <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+  <script src="https://cdn.rawgit.com/jeromeetienne/ar.js/1.7.2/aframe/build/aframe-ar.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/c-frame/aframe-gesture-detector@1.1.3/aframe-gesture-detector.min.js"></script>
+  <style>
+    body { margin: 0; overflow: hidden; }
+  </style>
+</head>
+<body>
+  <!-- Escena de A-Frame con AR.js sin marcador -->
+  <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;">
+    
+    <!-- Objeto 3D interactivo sin marcador -->
+    <a-entity
+      id="movable-object"
+      gltf-model="#your-3d-model"
+      position="0 0 0"
+      scale="0.3 0.3 0.3"
+      gesture-detector
+      rotation="0 0 0"
+      visible="false"> <!-- inicialmente no visible -->
+    </a-entity>
+
+    <!-- Cámara AR.js sin marcador -->
+    <a-entity camera look-controls></a-entity>
+  </a-scene>
+
+  <!-- Modelo 3D en formato GLTF -->
+  <a-assets>
+    <!-- Aquí debes colocar la ruta de tu modelo GLTF -->
+    <a-asset-item id="your-3d-model" src="path-to-your-model.gltf"></a-asset-item>
+  </a-assets>
+
+  <script>
+    const object = document.getElementById('movable-object');
+
+    // Mostrar el objeto cuando se toque la pantalla
+    window.addEventListener('click', (event) => {
+      if (!object.getAttribute('visible')) {
+        object.setAttribute('visible', 'true');
+        object.setAttribute('position', '0 0 -2'); // Aparecerá enfrente del usuario
+      }
+    });
+
+    // Detectar gestos y mover el objeto
+    object.addEventListener('dragstart', (event) => {
+      console.log('Object drag started:', event.detail.position);
+    });
+
+    object.addEventListener('dragmove', (event) => {
+      // Mover el objeto con el dedo (actualizar su posición)
+      const newPosition = event.detail.position;
+      object.setAttribute('position', newPosition);
+      console.log('Object moved to:', newPosition);
+    });
+
+    object.addEventListener('dragend', (event) => {
+      console.log('Object drag ended:', event.detail.position);
+    });
+  </script>
+</body>
+</html>
