@@ -16,6 +16,11 @@
         body {
             margin: 0;
             overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            width: 100vw;
         }
         #canvas-container {
             position: absolute;
@@ -25,21 +30,12 @@
             height: 100%;
             overflow: hidden;
         }
-        #info {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            color: white;
-            font-size: 18px;
-            z-index: 10;
-        }
     </style>
 </head>
 <body>
 
 <!-- Contenedor de la escena AR -->
 <div id="canvas-container"></div>
-<div id="info">Haz clic en una superficie para colocar el modelo</div>
 
 <!-- Script para la escena -->
 <script>
@@ -47,7 +43,6 @@
     let model, indicator;
     let raycaster = new THREE.Raycaster();
     let mouse = new THREE.Vector2();
-    let selectedPoint = null;
     let modelPlaced = false;
 
     // Crear la escena
@@ -126,19 +121,17 @@
         scene.add(model); // Añadir el modelo a la escena
     });
 
-    // Detección de la superficie y posicionamiento del indicador
-    window.addEventListener('click', onClickSurface);
-
-    function onClickSurface(event) {
+    // Detección de la superficie y posicionamiento del modelo
+    function placeModelOnSurface() {
         if (!modelPlaced) {
-            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+            mouse.x = 0;
+            mouse.y = 0;
 
             raycaster.setFromCamera(mouse, camera);
 
             let intersects = raycaster.intersectObject(indicator, true);
             if (intersects.length > 0) {
-                selectedPoint = intersects[0].point;
+                let selectedPoint = intersects[0].point;
                 placeModel(selectedPoint);
             }
         }
@@ -176,7 +169,15 @@
 
     // Iniciar animación
     animate();
+
+    // Colocar el modelo en la superficie apenas se abra la cámara
+    window.addEventListener('load', () => {
+        setTimeout(() => {
+            placeModelOnSurface();
+        }, 2000); // Espera unos segundos para cargar la cámara
+    });
 </script>
 
 </body>
 </html>
+
