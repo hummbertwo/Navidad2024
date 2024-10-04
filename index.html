@@ -1,227 +1,170 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AR.js & Three.js con Escalado</title>
+        <head>
+                <title>three.js ar - hit test</title>
+                <meta charset="utf-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+                <link type="text/css" rel="stylesheet" href="main.css">
+        </head>
+        <body>
 
-    <!-- Importar Three.js -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/110/three.min.js"></script>
+                <div id="info">
+                        <a href="https://threejs.org" target="_blank" rel="noopener">three.js</a> ar - hit test<br/>(Chrome Android 81+)
+                </div>
 
-    <!-- Importar AR.js -->
-    <script src="https://aframe.io/releases/1.0.4/aframe.min.js"></script>
-    <script src="https://cdn.rawgit.com/jeromeetienne/ar.js/1.7.7/aframe/build/aframe-ar.min.js"></script>
+                <script type="importmap">
+                        {
+                                "imports": {
+                                        "three": "../build/three.module.js",
+                                        "three/addons/": "./jsm/"
+                                }
+                        }
+                </script>
 
-    <style>
-        body {
-            margin: 0;
-            overflow: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            width: 100vw;
-        }
-        #canvas-container {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-        }
-        #controls {
-            position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            gap: 10px;
-            background-color: rgba(255, 255, 255, 0.8);
-            padding: 10px;
-            border-radius: 8px;
-        }
-        button {
-            padding: 10px;
-            font-size: 16px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        button:disabled {
-            background-color: #ccc;
-        }
-    </style>
-</head>
-<body>
+                <script type="module">
 
-<!-- Contenedor de la escena AR -->
-<div id="canvas-container"></div>
+                        import * as THREE from 'three';
+                        import { ARButton } from 'three/addons/webxr/ARButton.js';
 
-<!-- Controles para ajustar el tamaño del modelo -->
-<div id="controls">
-    <button id="scale-up" disabled>Aumentar</button>
-    <button id="scale-down" disabled>Disminuir</button>
-</div>
+                        let container;
+                        let camera, scene, renderer;
+                        let controller;
 
-<!-- Script para la escena -->
-<script>
-    let scene, camera, renderer;
-    let model, indicator;
-    let raycaster = new THREE.Raycaster();
-    let mouse = new THREE.Vector2();
-    let modelPlaced = false;
+                        let reticle;
 
-    // Crear la escena
-    scene = new THREE.Scene();
+                        let hitTestSource = null;
+                        let hitTestSourceRequested = false;
 
-    // Crear la cámara
-    camera = new THREE.Camera();
-    scene.add(camera);
+                        init();
 
-    // Configuración del renderizador
-    renderer = new THREE.WebGLRenderer({
-        antialias: true,
-        alpha: true // Fondo transparente
-    });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(window.devicePixelRatio);
-    renderer.domElement.style.position = 'absolute';
-    document.getElementById('canvas-container').appendChild(renderer.domElement);
+                        function init() {
 
-    // Luz ambiental para iluminar el modelo
-    let light = new THREE.AmbientLight(0xffffff, 1);
-    scene.add(light);
+                                container = document.createElement( 'div' );
+                                document.body.appendChild( container );
 
-    // Agregar AR.js a la escena (detectar superficie)
-    let arToolkitSource = new THREEx.ArToolkitSource({
-        sourceType: 'webcam', // Usar la cámara del dispositivo
-    });
+                                scene = new THREE.Scene();
 
-    arToolkitSource.init(() => {
-        setTimeout(() => {
-            onResize();
-        }, 2000);
-    });
+                                camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 0.01, 20 );
 
-    // Configurar AR Toolkit Context
-    let arToolkitContext = new THREEx.ArToolkitContext({
-        cameraParametersUrl: 'https://cdn.rawgit.com/jeromeetienne/ar.js/master/aframe/examples/marker-training/examples/camera_para.dat',
-        detectionMode: 'mono'
-    });
+                                const light = new THREE.HemisphereLight( 0xffffff, 0xbbbbff, 3 );
+                                light.position.set( 0.5, 1, 0.25 );
+                                scene.add( light );
 
-    arToolkitContext.init(() => {
-        camera.projectionMatrix.copy(arToolkitContext.getProjectionMatrix());
-    });
+                                //
 
-    // Detectar redimensionamiento de pantalla
-    window.addEventListener('resize', () => {
-        onResize();
-    });
+                                renderer = new THREE.WebGLRenderer( { antialias: true, alpha: true } );
+                                renderer.setPixelRatio( window.devicePixelRatio );
+                                renderer.setSize( window.innerWidth, window.innerHeight );
+                                renderer.setAnimationLoop( animate );
+                                renderer.xr.enabled = true;
+                                container.appendChild( renderer.domElement );
 
-    function onResize() {
-        arToolkitSource.onResizeElement();
-        arToolkitSource.copyElementSizeTo(renderer.domElement);
-        if (arToolkitContext.arController !== null) {
-            arToolkitSource.copyElementSizeTo(arToolkitContext.arController.canvas);
-        }
-    }
+                                //
 
-    // Marcador AR para posicionar el modelo en el suelo
-    let markerRoot = new THREE.Group();
-    scene.add(markerRoot);
+                                document.body.appendChild( ARButton.createButton( renderer, { requiredFeatures: [ 'hit-test' ] } ) );
 
-    // Indicador: Crear un círculo para mostrar la detección de la superficie
-    let circleGeometry = new THREE.CircleGeometry(0.2, 32);
-    let circleMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff, opacity: 0.5, transparent: true });
-    indicator = new THREE.Mesh(circleGeometry, circleMaterial);
-    indicator.rotation.x = -Math.PI / 2; // Ponerlo paralelo al suelo
-    indicator.visible = false; // Al principio, el indicador está oculto
-    scene.add(indicator);
+                                //
 
-    // Cargar modelo 3D
-    let loader = new THREE.GLTFLoader();
-    loader.load('https://modelviewer.dev/shared-assets/models/Astronaut.glb', (gltf) => {
-        model = gltf.scene;
-        model.scale.set(0.3, 0.3, 0.3); // Ajustar tamaño inicial del modelo
-        model.visible = false; // Ocultar hasta que sea colocado
-        scene.add(model); // Añadir el modelo a la escena
-    });
+                                const geometry = new THREE.CylinderGeometry( 0.1, 0.1, 0.2, 32 ).translate( 0, 0.1, 0 );
 
-    // Detección de la superficie y posicionamiento del modelo
-    function placeModelOnSurface() {
-        if (!modelPlaced) {
-            mouse.x = 0;
-            mouse.y = 0;
+                                function onSelect() {
 
-            raycaster.setFromCamera(mouse, camera);
+                                        if ( reticle.visible ) {
 
-            let intersects = raycaster.intersectObject(indicator, true);
-            if (intersects.length > 0) {
-                let selectedPoint = intersects[0].point;
-                placeModel(selectedPoint);
-            }
-        }
-    }
+                                                const material = new THREE.MeshPhongMaterial( { color: 0xffffff * Math.random() } );
+                                                const mesh = new THREE.Mesh( geometry, material );
+                                                reticle.matrix.decompose( mesh.position, mesh.quaternion, mesh.scale );
+                                                mesh.scale.y = Math.random() * 2 + 1;
+                                                scene.add( mesh );
 
-    // Colocar el modelo en la superficie
-    function placeModel(position) {
-        model.position.set(position.x, position.y, position.z);
-        model.visible = true;
-        modelPlaced = true;
-        indicator.visible = false;
-        document.getElementById('scale-up').disabled = false;
-        document.getElementById('scale-down').disabled = false;
-    }
+                                        }
 
-    // Función de animación
-    function animate() {
-        requestAnimationFrame(animate);
+                                }
 
-        // Actualizar el contexto de AR.js
-        if (arToolkitSource.ready !== false) {
-            arToolkitContext.update(arToolkitSource.domElement);
-        }
+                                controller = renderer.xr.getController( 0 );
+                                controller.addEventListener( 'select', onSelect );
+                                scene.add( controller );
 
-        // Detectar la superficie
-        raycaster.setFromCamera(mouse, camera);
-        let intersects = raycaster.intersectObject(indicator, true);
+                                reticle = new THREE.Mesh(
+                                        new THREE.RingGeometry( 0.15, 0.2, 32 ).rotateX( - Math.PI / 2 ),
+                                        new THREE.MeshBasicMaterial()
+                                );
+                                reticle.matrixAutoUpdate = false;
+                                reticle.visible = false;
+                                scene.add( reticle );
 
-        if (intersects.length > 0 && !modelPlaced) {
-            let intersect = intersects[0];
-            indicator.position.copy(intersect.point);
-            indicator.visible = true;
-        }
+                                //
 
-        renderer.render(scene, camera);
-    }
+                                window.addEventListener( 'resize', onWindowResize );
 
-    // Iniciar animación
-    animate();
+                        }
 
-    // Colocar el modelo al hacer clic
-    window.addEventListener('click', () => {
-        if (!modelPlaced) {
-            placeModelOnSurface();
-        }
-    });
+                        function onWindowResize() {
 
-    // Funcionalidad para escalar el modelo
-    document.getElementById('scale-up').addEventListener('click', () => {
-        if (model) {
-            model.scale.multiplyScalar(1.1); // Aumentar el tamaño
-        }
-    });
+                                camera.aspect = window.innerWidth / window.innerHeight;
+                                camera.updateProjectionMatrix();
 
-    document.getElementById('scale-down').addEventListener('click', () => {
-        if (model) {
-            model.scale.multiplyScalar(0.9); // Disminuir el tamaño
-        }
-    });
-</script>
+                                renderer.setSize( window.innerWidth, window.innerHeight );
 
-</body>
+                        }
+
+                        //
+
+                        function animate( timestamp, frame ) {
+
+                                if ( frame ) {
+
+                                        const referenceSpace = renderer.xr.getReferenceSpace();
+                                        const session = renderer.xr.getSession();
+
+                                        if ( hitTestSourceRequested === false ) {
+
+                                                session.requestReferenceSpace( 'viewer' ).then( function ( referenceSpace ) {
+
+                                                        session.requestHitTestSource( { space: referenceSpace } ).then( function ( source ) {
+
+                                                                hitTestSource = source;
+
+                                                        } );
+
+                                                } );
+
+                                                session.addEventListener( 'end', function () {
+
+                                                        hitTestSourceRequested = false;
+                                                        hitTestSource = null;
+
+                                                } );
+
+                                                hitTestSourceRequested = true;
+
+                                        }
+
+                                        if ( hitTestSource ) {
+
+                                                const hitTestResults = frame.getHitTestResults( hitTestSource );
+
+                                                if ( hitTestResults.length ) {
+
+                                                        const hit = hitTestResults[ 0 ];
+
+                                                        reticle.visible = true;
+                                                        reticle.matrix.fromArray( hit.getPose( referenceSpace ).transform.matrix );
+
+                                                } else {
+
+                                                        reticle.visible = false;
+
+                                                }
+
+                                        }
+
+                                }
+
+                                renderer.render( scene, camera );
+
+                        }
+
+                </script>
+        </body>
 </html>
-
