@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AR.js & Three.js Example</title>
+    <title>AR.js & Three.js with Surface Detection</title>
 
     <!-- Importar Three.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/110/three.min.js"></script>
@@ -39,13 +39,16 @@
 
 <!-- Contenedor de la escena AR -->
 <div id="canvas-container"></div>
-<div id="info">Mueve la cámara para detectar la superficie</div>
+<div id="info">Haz clic en una superficie para colocar el modelo</div>
 
 <!-- Script para la escena -->
 <script>
-    // Configuración básica
     let scene, camera, renderer;
-    let model;
+    let model, indicator;
+    let raycaster = new THREE.Raycaster();
+    let mouse = new THREE.Vector2();
+    let selectedPoint = null;
+    let modelPlaced = false;
 
     // Crear la escena
     scene = new THREE.Scene();
@@ -106,19 +109,48 @@
     let markerRoot = new THREE.Group();
     scene.add(markerRoot);
 
-    let arMarkerControls = new THREEx.ArMarkerControls(arToolkitContext, markerRoot, {
-        type: 'pattern',
-        patternUrl: 'https://cdn.rawgit.com/jeromeetienne/ar.js/master/aframe/examples/marker-training/examples/pattern-marker.patt',
-    });
+    // Indicador: Crear un círculo para mostrar la detección de la superficie
+    let circleGeometry = new THREE.CircleGeometry(0.2, 32);
+    let circleMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff, opacity: 0.5, transparent: true });
+    indicator = new THREE.Mesh(circleGeometry, circleMaterial);
+    indicator.rotation.x = -Math.PI / 2; // Ponerlo paralelo al suelo
+    indicator.visible = false; // Al principio, el indicador está oculto
+    scene.add(indicator);
 
     // Cargar modelo 3D
     let loader = new THREE.GLTFLoader();
     loader.load('https://modelviewer.dev/shared-assets/models/Astronaut.glb', (gltf) => {
         model = gltf.scene;
-        model.scale.set(0.5, 0.5, 0.5); // Ajustar tamaño del modelo
-        model.position.y = 0.5; // Elevarlo para que esté sobre la superficie
-        markerRoot.add(model); // Añadir el modelo al marcador
+        model.scale.set(0.3, 0.3, 0.3); // Ajustar tamaño del modelo
+        model.visible = false; // Ocultar hasta que sea colocado
+        scene.add(model); // Añadir el modelo a la escena
     });
+
+    // Detección de la superficie y posicionamiento del indicador
+    window.addEventListener('click', onClickSurface);
+
+    function onClickSurface(event) {
+        if (!modelPlaced) {
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+            raycaster.setFromCamera(mouse, camera);
+
+            let intersects = raycaster.intersectObject(indicator, true);
+            if (intersects.length > 0) {
+                selectedPoint = intersects[0].point;
+                placeModel(selectedPoint);
+            }
+        }
+    }
+
+    // Colocar el modelo en la superficie
+    function placeModel(position) {
+        model.position.set(position.x, position.y, position.z);
+        model.visible = true;
+        modelPlaced = true;
+        indicator.visible = false;
+    }
 
     // Función de animación
     function animate() {
@@ -129,9 +161,14 @@
             arToolkitContext.update(arToolkitSource.domElement);
         }
 
-        // Rotación del modelo para dar interacción
-        if (model) {
-            model.rotation.y += 0.01; // Girar el modelo
+        // Detectar la superficie
+        raycaster.setFromCamera(mouse, camera);
+        let intersects = raycaster.intersectObject(indicator, true);
+
+        if (intersects.length > 0 && !modelPlaced) {
+            let intersect = intersects[0];
+            indicator.position.copy(intersect.point);
+            indicator.visible = true;
         }
 
         renderer.render(scene, camera);
