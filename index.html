@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Three.js AR Cube on Mobile</title>
+    <title>Three.js AR Cylinder on Mobile</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
     <script src="https://cdn.rawgit.com/jeromeetienne/ar.js/1.7.2/aframe/build/aframe-ar.min.js"></script>
@@ -14,18 +14,18 @@
     <!-- Cámara con AR.js -->
     <a-entity camera></a-entity>
 
-    <!-- Indicador de base -->
-    <a-cylinder id="baseIndicator" position="0 0 0" rotation="-90 0 0" radius="0.1" height="0.01" color="red" material="opacity: 0.5;"></a-cylinder>
+    <!-- Indicador de base (círculo blanco) -->
+    <a-ring id="baseIndicator" position="0 0 0" rotation="-90 0 0" radius-inner="0.1" radius-outer="0.15" color="white" material="opacity: 0.8;"></a-ring>
 
-    <!-- Cubo que aparecerá cuando se toque la pantalla -->
-    <a-box id="cube" position="0 0.05 0" rotation="0 45 0" color="#4CC3D9" scale="0.1 0.1 0.1" visible="false"></a-box>
+    <!-- Cilindro amarillo que aparecerá cuando se toque la pantalla -->
+    <a-cylinder id="cylinder" position="0 0.15 0" radius="0.1" height="0.3" color="yellow" visible="false"></a-cylinder>
 
     <!-- Suelo invisible para detectar el toque -->
     <a-plane position="0 0 0" rotation="-90 0 0" width="10" height="10" material="opacity: 0; transparent: true;" id="floor"></a-plane>
 
     <script>
         // Obtener elementos
-        const cube = document.getElementById('cube');
+        const cylinder = document.getElementById('cylinder');
         const baseIndicator = document.getElementById('baseIndicator');
         const floor = document.getElementById('floor');
 
@@ -33,8 +33,8 @@
         floor.addEventListener('click', function (event) {
             const intersection = event.detail.intersection.point; // Punto donde se toca
             baseIndicator.setAttribute('position', intersection); // Mover el indicador de base
-            cube.setAttribute('position', {x: intersection.x, y: 0.05, z: intersection.z}); // Colocar el cubo
-            cube.setAttribute('visible', 'true'); // Hacer visible el cubo
+            cylinder.setAttribute('position', {x: intersection.x, y: 0.15, z: intersection.z}); // Colocar el cilindro
+            cylinder.setAttribute('visible', 'true'); // Hacer visible el cilindro
         });
     </script>
 </a-scene>
