@@ -29,6 +29,20 @@ h3 {
     margin: 0;
 }
 
+/* Logo Section */
+.logo-section {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px 0;
+}
+
+.logo-section .logo {
+    max-width: 100px;
+    height: auto;
+}
+
+
 
 /* Evento */
 .event {
@@ -256,6 +270,3 @@ button:hover {
         margin-bottom: 10px;
     }
 }
-
-        
-        
