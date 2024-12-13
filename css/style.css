@@ -153,11 +153,12 @@ button:hover {
 .hero-text p {
     font-size: 1.2rem;
     margin: 20px 0;
+    color: #fff;
 }
 
 .hero-text a {
     text-decoration: none;
-    background: #e58af7;
+    background: #095c24;
     color: #fff;
     padding: 10px 20px;
     border-radius: 5px;
@@ -229,7 +230,7 @@ button:hover {
     }
 
     .hero img {
-        max-width: 50%;
+        max-width: 60%;
         margin: 20px 0;
     }
 
@@ -270,3 +271,4 @@ button:hover {
         margin-bottom: 10px;
     }
 }
+
