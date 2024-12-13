@@ -137,6 +137,7 @@ button:hover {
 }
 
 .hero-text {
+    line-height: 320%;
     max-width: 100%;
 }
 
