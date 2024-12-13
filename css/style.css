@@ -224,6 +224,25 @@ button:hover {
     color: #fff;
 }
 
+
+.footer {
+    text-align: center;
+
+}
+.social-icons {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+.social-icons .icon {
+    font-size: 24px;
+    color: #ffffff;
+    text-decoration: none;
+}
+.social-icons .icon:hover {
+    color: #0077b5; /* Cambia a un color de hover atractivo */
+}
+
 /* Responsivo */
 @media screen and (max-width: 768px) {
     .hero {
@@ -272,4 +291,3 @@ button:hover {
         margin-bottom: 10px;
     }
 }
-
