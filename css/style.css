@@ -1,0 +1,137 @@
+  body {
+      margin: 0;
+      padding: 0;
+      font-family: Poppins, sans-serif;
+      background: linear-gradient(to bottom, #1e3c72, #2a5298);
+      color: white;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+    }
+
+.container {
+      text-align: center;
+      padding: 50px 20px;
+    }
+
+    h1 {
+      font-size: 3em;
+      margin-bottom: 20px;
+      animation: fadeIn 3s ease-in-out infinite alternate;
+    }
+
+    p {
+      font-size: 1.2em;
+      animation: slideIn 5s ease-in-out infinite alternate;
+    }
+
+    @keyframes fadeIn {
+      0% { opacity: 0.3; }
+      100% { opacity: 1; }
+    }
+
+    @keyframes slideIn {
+      0% { transform: translateY(-20px); }
+      100% { transform: translateY(20px); }
+    }
+
+    .snowflake {
+      position: fixed;
+      top: -10px;
+      color: white;
+      font-size: 1em;
+      pointer-events: none;
+      animation: fall 10s linear infinite;
+    }
+
+    @keyframes fall {
+      0% { transform: translateY(-10px) translateX(0); opacity: 1; }
+      100% { transform: translateY(100vh) translateX(20px); opacity: 0.5; }
+    }
+
+    button {
+      background-color: #ff4d4d;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      font-size: 1.2em;
+      cursor: pointer;
+      border-radius: 5px;
+      margin: 20px auto 0 auto;
+      display: block;
+    }
+
+    button:hover {
+      background-color: #cc0000;
+    }
+
+    /* Responsivo */
+    @media screen and (max-width: 600px) {
+      h1 {
+        font-size: 2em;
+      }
+
+      p {
+        font-size: 1em;
+      }
+
+      button {
+        font-size: 1em;
+        padding: 8px 16px;
+      }
+    }
+
+        #bars {
+            position: fixed;
+      top: 30px;
+      right: 50px;
+      font-size: 30px;
+      color: white;
+      cursor: pointer;
+      padding: 10px;
+      border-radius: 50%;
+      z-index: 100;
+        }
+
+        .bar {
+            background: #ffffff;
+            bottom: 1px;
+            height: 3px;
+            position: absolute;
+            width: 3px;
+            animation: sound 0ms -800ms linear infinite alternate;
+        }
+
+        @keyframes sound {
+            0% {
+                opacity: .35;
+                height: 3px;
+            }
+            100% {
+                opacity: 1;
+                height: 18px;
+            }
+        }
+
+        .bar:nth-child(1)  { left: 1px; animation-duration: 474ms; }
+        .bar:nth-child(2)  { left: 5px; animation-duration: 433ms; }
+        .bar:nth-child(3)  { left: 9px; animation-duration: 407ms; }
+        .bar:nth-child(4)  { left: 13px; animation-duration: 458ms; }
+        .bar:nth-child(5)  { left: 17px; animation-duration: 400ms; }
+        .bar:nth-child(6)  { left: 21px; animation-duration: 427ms; }
+        .bar:nth-child(7)  { left: 25px; animation-duration: 441ms; }
+        .bar:nth-child(8)  { left: 29px; animation-duration: 419ms; }
+        .bar:nth-child(9)  { left: 33px; animation-duration: 487ms; }
+        .bar:nth-child(10) { left: 37px; animation-duration: 442ms; }
+
+        .muted .bar {
+            animation: none;
+            height: 3px;
+            opacity: 0.5;
+        }
+        
+        
