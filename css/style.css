@@ -229,6 +229,11 @@ button:hover {
     text-align: center;
 
 }
+.footer-text p {
+    font-size: 0.8rem;
+    text-align: center;
+    color: #fff;
+}
 .social-icons {
     display: flex;
     justify-content: center;
